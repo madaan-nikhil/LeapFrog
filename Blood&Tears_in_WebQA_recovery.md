@@ -81,9 +81,27 @@ Here, we would like to clarify several paths:
 * ```txt_dataset_json_path``` actually means the ```WebQA_train_val.json```. 
 * ```model_recover_path``` needs to specify to ```None``` for the first run.
 
+
+3. (WebQA_x101fpn) We would like to run the ```featureExtraction.py```. As expected, super many confusing absolute paths. 
+* The ```config="COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"``` directed to a strange path and it seems that the ```config``` variable is not using. I don't know whether we can ignore the file at present.
+* File ```faster_rcnn_X_101_32x8d_FPN_3x.yaml``` and  ```e2e_faster_rcnn_X-101-64x4d-FPN_2x-vlp-427.pkl``` can be found in ```11777_project/baseline/WebQA_x101fpn/detectron-vlp```. So, we can simply change the path so that the code reads
+
+```
+    ## the original code
+    # cfg.merge_from_file("/home/yingshac/CYS/WebQnA/RegionFeature/detectron-vlp/faster_rcnn_X_101_32x8d_FPN_3x.yaml")
+    # cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = threshold  # set threshold for this model
+    # cfg.MODEL.WEIGHTS = "/home/yingshac/CYS/WebQnA/RegionFeature/detectron-vlp/e2e_faster_rcnn_X-101-64x4d-FPN_2x-vlp-427.pkl"
+
+    cfg.merge_from_file("detectron-vlp/faster_rcnn_X_101_32x8d_FPN_3x.yaml")
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = threshold  # set threshold for this model
+    cfg.MODEL.WEIGHTS = "detectron-vlp/e2e_faster_rcnn_X-101-64x4d-FPN_2x-vlp-427.pkl"
+```
+
 ## Where is the dataset?
 
-Since the dataset is too large, I store it on a windows sector, which can be fmound in path
+I followed the provided ```download_imgs.sh``` to download the dataset, but I think the website has a timeout strategy to prevent an overlong connection. At my machine, the downloading process stopped after downloading around 30 chunks. So I choose to save shared Google Drive folder and let Google Drive to synchronize the dataset to my local folder. If you have a similar problem, you can try to use Google Drive as I did.
+
+Since the dataset is too large, I store it on a windows sector, which can be mound in path
 
 ```
 /media/UoneWorkspace/MMML_dataset/dataset/WebQA/WebQA_imgs_7z_chunks/
