@@ -5,7 +5,7 @@ from __future__ import division
 from __future__ import print_function
 
 
-DATASET_PATH = "../../dataset/WebQA/" # the path that stores all the dataset files
+DATASET_PATH = "../../../../dataset/WebQA/" # the path that stores all the dataset files
 
 import os
 os.environ['MASTER_ADDR'] = 'localhost'
