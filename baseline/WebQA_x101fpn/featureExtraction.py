@@ -71,10 +71,16 @@ print("bucket = ", args.bucket)
 if __name__ == "__main__":
     threshold = float(args.threshold)
     cfg = get_cfg()
-    config = "COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"
-    cfg.merge_from_file("/home/yingshac/CYS/WebQnA/RegionFeature/detectron-vlp/faster_rcnn_X_101_32x8d_FPN_3x.yaml")
+    # the "config" file seems unused, and could not find the corresponding yaml file. 
+    # may come from the VLP?
+    config = "COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml" 
+    cfg.merge_from_file("detectron-vlp/faster_rcnn_X_101_32x8d_FPN_3x.yaml")
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = threshold  # set threshold for this model
-    cfg.MODEL.WEIGHTS = "/home/yingshac/CYS/WebQnA/RegionFeature/detectron-vlp/e2e_faster_rcnn_X-101-64x4d-FPN_2x-vlp-427.pkl"
+    cfg.MODEL.WEIGHTS = "detectron-vlp/e2e_faster_rcnn_X-101-64x4d-FPN_2x-vlp-427.pkl"
+    # config = "COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"
+    # cfg.merge_from_file("/home/yingshac/CYS/WebQnA/RegionFeature/detectron-vlp/faster_rcnn_X_101_32x8d_FPN_3x.yaml")
+    # cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = threshold  # set threshold for this model
+    # cfg.MODEL.WEIGHTS = "/home/yingshac/CYS/WebQnA/RegionFeature/detectron-vlp/e2e_faster_rcnn_X-101-64x4d-FPN_2x-vlp-427.pkl"
     model = build_model(cfg)
     print("Finish building model")
     DetectionCheckpointer(model).load(cfg.MODEL.WEIGHTS) 
