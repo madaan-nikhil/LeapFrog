@@ -24,7 +24,7 @@ conda install -c conda-forge visdom
 
 ## Preparation Work
 
-The author did a super bad job on managing the code for publication. We would like to use the following settings to clearly describe how to try to run the code. The guideline of our attempts are as follows:
+The author did not do a good job on managing the code for publication. We would like to use the following settings to clearly describe how to try to run the code. The guideline of our attempts are as follows:
 1. Replace any confusing, distracting absolute path to a relatively path.
 2. Separate out the path to dataset, path to checkpoint, and path to model weight from external sources
 3. Add comments!!!!!!!!!!
