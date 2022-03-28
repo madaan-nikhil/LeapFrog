@@ -4,6 +4,7 @@
 
 * 03/19 02:33 AM, faild at ```run_webqa.py``` line 577. Missing confusing img.pkl files.
 * 03/27 05:45 PM, the author instructed to use WebQA_x101. Having no idea how it is managed.
+* 03/27 09:41 PM, successfully reproduced the WebQA load image demo. Thankfully, this demo works smoothly.
 
 ## What is missing
 
@@ -134,7 +135,14 @@ Then, you need to activate the vlp environment
 conda activate vlp
 ```
 ## First Step Retrieval training
+
+### run_webqa.py
 ```
 python run_webqa.py --new_segment_ids --train_batch_size 128 --split train --answer_provided_by 'img|txt' --task_to_learn 'filter' --num_workers 4 --max_pred 10 --mask_prob 1.0 --learning_rate 3e-5 --gradient_accumulation_steps 128 --save_loss_curve --output_dir data/output/filter_debug --ckpts_dir ./data/ckpts/filter_debug --use_x_distractors --do_train --num_train_epochs 1
+```
+
+### run_webqa_vinval.py
+```
+python run_webqa_vinvl.py --new_segment_ids --train_batch_size 128 --split train --answer_provided_by 'img|txt' --task_to_learn 'filter' --num_workers 4 --max_pred 10 --mask_prob 1.0 --learning_rate 3e-5 --gradient_accumulation_steps 128 --save_loss_curve --output_dir data/output/filter_debug --ckpts_dir ./data/ckpts/filter_debug --use_x_distractors --do_train --num_train_epochs 1
 ```
 
