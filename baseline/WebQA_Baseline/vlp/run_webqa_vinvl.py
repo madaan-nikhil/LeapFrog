@@ -4,12 +4,17 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+DATASET_PATH = "../../../../dataset/WebQA/" # the path that stores all the dataset files
+TSVFILE_PATH = "/media/UoneWorkspace/MMML_dataset/dataset/WebQA/WebQA_imgs_7z_chunks/imgs.tsv"
+
 import os
 os.environ['MASTER_ADDR'] = 'localhost'
 #os.environ['MASTER_PORT'] = '12355'
 import sys
-sys.path.append("/home/yingshac/CYS/WebQnA/VLP")
-sys.path.append("/home/yingshan/CYS/WebQnA/VLP")
+
+# I know, absolute path is bad, but I don't know how to fix it 
+sys.path.append("/home/yipenglin/Spring2022_MMML_Project/WebQA_Baseline")
+
 import logging
 import glob
 import math, time
@@ -84,7 +89,7 @@ def main():
     parser.add_argument("--config_path", default=None, type=str,
                         help="Bert config file path.")
     parser.add_argument("--ckpts_dir",
-                        default='/data/yingshac/MMMHQA/ckpts/no_model_name_specified/',
+                        default='./data/ckpts/no_model_name_specified/',
                         type=str,
                         help="The output directory where checkpoints will be written.")
     parser.add_argument("--output_dir",
@@ -96,8 +101,8 @@ def main():
                         type=str,
                         help="The output directory where the log will be written.")
     parser.add_argument("--model_recover_path",
-                        #default=None,
-                        default="/home/yingshac/CYS/WebQnA/cpts/cc_g8_lr1e-4_batch512_s0.75_b0.25/model.30.bin",
+                        default=None,
+                        # default="/home/yingshac/CYS/WebQnA/cpts/cc_g8_lr1e-4_batch512_s0.75_b0.25/model.30.bin",
                         type=str,
                         help="The file of fine-tuned pretraining model.")
     parser.add_argument("--do_train",
@@ -187,8 +192,11 @@ def main():
                         help="max position embeddings")
 
     # webqa dataset
-    parser.add_argument('--txt_dataset_json_path', type=str, default="/home/yingshac/CYS/WebQnA/WebQnA_data_new/txt_dataset_0904_clean_fields.json")
-    parser.add_argument('--img_dataset_json_path', type=str, default="/home/yingshac/CYS/WebQnA/WebQnA_data_new/img_dataset_0904_clean_fields.json")
+    # parser.add_argument('--txt_dataset_json_path', type=str, default="/home/yingshac/CYS/WebQnA/WebQnA_data_new/txt_dataset_0904_clean_fields.json")
+    # parser.add_argument('--img_dataset_json_path', type=str, default="/home/yingshac/CYS/WebQnA/WebQnA_data_new/img_dataset_0904_clean_fields.json")
+    parser.add_argument('--txt_dataset_json_path', type=str, default=os.path.join(DATASET_PATH, "WebQA_train_val_small.json"), help="the path to the txt dataset path if you have")
+    parser.add_argument('--img_dataset_json_path', type=str, default=os.path.join(DATASET_PATH, "WebQA_train_val_small.json"), help="the path to the img dataset path if you have")
+
     parser.add_argument('--use_num_samples', type=int, default=-1, help="how many samples should be loaded into memory")
     parser.add_argument('--answer_provided_by', type=str, default="img|txt")
     parser.add_argument('--use_x_distractors', action='store_true')
@@ -218,16 +226,19 @@ def main():
     parser.add_argument('--Qcate', type=str, default=['all'])
 
     # Add VinVL feature support
-    parser.add_argument('--gold_img_tsv', default="/data/yingshac/MMMHQA/VinVL_output/gold_0_22265/gold_vinvl.tsv", type=str)
-    parser.add_argument('--neg_img_tsv', default="/data/yingshac/MMMHQA/VinVL_output/neg_imgs_0_338842/distractors_vinvl.tsv", type=str)
-    parser.add_argument('--x_neg_img_tsv', default="/data/yingshac/MMMHQA/VinVL_output/x_neg_imgs_0_240661/x_distractors_vinvl.tsv", type=str)
+    # parser.add_argument('--gold_img_tsv', default="/data/yingshac/MMMHQA/VinVL_output/gold_0_22265/gold_vinvl.tsv", type=str)
+    # parser.add_argument('--neg_img_tsv', default="/data/yingshac/MMMHQA/VinVL_output/neg_imgs_0_338842/distractors_vinvl.tsv", type=str)
+    # parser.add_argument('--x_neg_img_tsv', default="/data/yingshac/MMMHQA/VinVL_output/x_neg_imgs_0_240661/x_distractors_vinvl.tsv", type=str)
+    parser.add_argument('--gold_img_tsv', default=TSVFILE_PATH, type=str)
+    parser.add_argument('--neg_img_tsv', default=TSVFILE_PATH, type=str)
+    parser.add_argument('--x_neg_img_tsv', default=TSVFILE_PATH, type=str)
     parser.add_argument('--vis_emb_ft_epc', default=0, type=int)
     
     parser.add_argument('--world_size', default = 1, type = int,
                         help = 'number of distributed processes')
     parser.add_argument('--dist_url', default='file://[PT_OUTPUT_DIR]/nonexistent_file', type = str,
                         help = 'url used to set up distributed training')
-    parser.add_argument('--file_valid_jpgs', default='/mnt/dat/COCO/annotations/coco_valid_jpgs.json', type=str)
+    parser.add_argument('--file_valid_jpgs', default='/mnt/dat/COCO/annotations/coco_valid_jpgs.json', type=str) # TODO: what is this???? Seems unused again. 
     parser.add_argument('--sche_mode', default='warmup_linear', type=str,
                         help="warmup_linear | warmup_constant | warmup_cosine")
     parser.add_argument('--drop_prob', default=0.1, type=float)
@@ -452,7 +463,8 @@ def main():
             model.bert.embeddings.position_embeddings.float()
             model.bert.embeddings.token_type_embeddings.float()
     print("model.to(device)")
-    model.to(device)
+    # model.to(device) # TODO: for debug, we didn't move it to GPU, just to save time
+    print("load model end")
     if args.local_rank != -1:
         try:
             # from apex.parallel import DistributedDataParallel as DDP

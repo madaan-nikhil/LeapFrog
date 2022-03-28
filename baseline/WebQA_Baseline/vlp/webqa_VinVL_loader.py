@@ -528,6 +528,7 @@ class Preprocess4webqa_VinVL(Pipeline):
                         segment_ids.extend([0] * n_pad)
 
                         image_id = int(image_id)
+                        print("VinVL loader image_id: ", image_id)
                         vis_pe, scores, img, cls_label = self.img_data_tsv[image_id//10000000][image_id % 10000000]
                         
 

@@ -6,13 +6,14 @@ from __future__ import print_function
 
 
 DATASET_PATH = "../../../../dataset/WebQA/" # the path that stores all the dataset files
+TSVFILE_PATH = "/media/UoneWorkspace/MMML_dataset/dataset/WebQA/WebQA_imgs_7z_chunks/imgs.tsv"
 
 import os
 os.environ['MASTER_ADDR'] = 'localhost'
 #os.environ['MASTER_PORT'] = '12355'
 import sys
 
-sys.path.append("/home/yipenglin/Spring2022_MMML_Project/WebQA_Baseline")
+# I know, absolute path is bad, but I don't know how to fix it 
 sys.path.append("/home/yipenglin/Spring2022_MMML_Project/WebQA_Baseline")
 
 import logging
