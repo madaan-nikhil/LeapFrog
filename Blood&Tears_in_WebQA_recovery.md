@@ -54,6 +54,8 @@ We also should the file hierarchy in the ```11777_project``` directory, just to 
 
 Since we are expecting a super large workload on renovating the author's source code, we simply copied the majority of the source code from the author's provided github repositories and prepared to refactorize it. 
 
+4. The ```imgs.lineidx``` must be saved in the same directory as the extracted ```imgs.tsv```, at least the author assumed you do so.
+
 ## Painful walkthrough of the path issue fixing 
 1. (WebQA_Baseline) The author uses "VLP" rather than "WebQA_Baseline" as the working directory. Therefore, in the README.md, "cd VLP" actually means "cd WebQA_Baseline".
 2. (WebQA_Baseline) There are super many places that the author uses an absolute path to specify a folder/file. You can search all of them out using keyword ```yingshac```. You need to check the following files
@@ -96,6 +98,17 @@ Here, we would like to clarify several paths:
     cfg.merge_from_file("detectron-vlp/faster_rcnn_X_101_32x8d_FPN_3x.yaml")
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = threshold  # set threshold for this model
     cfg.MODEL.WEIGHTS = "detectron-vlp/e2e_faster_rcnn_X-101-64x4d-FPN_2x-vlp-427.pkl"
+```
+
+4. (WebQA_Baseline) You may see the following error 
+```
+vis_pe, scores, img, cls_label = self.img_data_tsv[image_id//10000000][image_id % 10000000]
+
+KeyError: 3
+```
+The reason is that the author thinks (maybe for some preliminary versions) images for gold/distractor/x-distractors are from different tsv files. However, WebQA only provides one TSV file (maybe all three sources are concatenated into the same file source). Since we assign the same tsv file path to all the three file sources, we force the img_data_tsv to load image from the gold source, which brings the following modification
+```
+vis_pe, scores, img, cls_label = self.img_data_tsv[0][image_id % 10000000]
 ```
 
 ## Where is the dataset?
