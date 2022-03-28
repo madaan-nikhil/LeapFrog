@@ -23,6 +23,16 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+"""
+ADDED BY 11777 victims
+"""
+DETECTRON_WEIGHTS_FILE_fc7_w = "../../../../detectron_weights/fc7_w.pkl"
+DETECTRON_WEIGHTS_FILE_fc7_b = "../../../../detectron_weights/fc7_b.pkl"
+"""
+END
+"""
+
+
 import os
 import copy
 import json
@@ -1033,9 +1043,9 @@ class BertForWebqa(PreTrainedBertModel):
                                         nn.Dropout(config.hidden_dropout_prob)) # use to be 0.3
             try:
                 self.vis_embed[0].weight.data.copy_(torch.from_numpy(pickle.load(
-                        open('../detectron_weights/fc7_w.pkl', 'rb'))))
+                        open(DETECTRON_WEIGHTS_FILE_fc7_w, 'rb'))))
                 self.vis_embed[0].bias.data.copy_(torch.from_numpy(pickle.load(
-                        open('../detectron_weights/fc7_b.pkl', 'rb'))))
+                        open(DETECTRON_WEIGHTS_FILE_fc7_b, 'rb'))))
             except:
                 raise Exception('Cannot find Detectron fc7 weights! Download from https://dl.fbaipublicfiles.com/ActivityNet-Entities/ActivityNet-Entities/detectron_weights.tar.gz and uncompress under the code root directory.')
 

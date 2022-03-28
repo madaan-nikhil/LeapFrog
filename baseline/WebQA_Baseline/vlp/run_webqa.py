@@ -5,13 +5,18 @@ from __future__ import division
 from __future__ import print_function
 
 
-DATASET_PATH = "../../../../dataset/WebQA/" # the path that stores all the dataset files
-TSVFILE_PATH = "/media/UoneWorkspace/MMML_dataset/dataset/WebQA/WebQA_imgs_7z_chunks/imgs.tsv"
-
 import os
 os.environ['MASTER_ADDR'] = 'localhost'
 #os.environ['MASTER_PORT'] = '12355'
 import sys
+
+DEBUG_LEAVE_ON_CPU = True # default False
+
+
+DATASET_PATH = "../../../../dataset/WebQA/" # the path that stores all the dataset files
+TSVFILE_PATH = "/media/UoneWorkspace/MMML_dataset/dataset/WebQA/WebQA_imgs_7z_chunks/imgs.tsv"
+
+
 
 # I know, absolute path is bad, but I don't know how to fix it 
 sys.path.append("../../WebQA_Baseline")
@@ -475,7 +480,8 @@ def main():
             model.bert.embeddings.position_embeddings.float()
             model.bert.embeddings.token_type_embeddings.float()
     print("model.to(device)")
-    model.to(device)
+    if not DEBUG_LEAVE_ON_CPU:
+        model.to(device)
     if args.local_rank != -1:
         try:
             # from apex.parallel import DistributedDataParallel as DDP

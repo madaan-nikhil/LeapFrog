@@ -17,6 +17,22 @@ import imghdr
 import numpy as np
 import sys
 
+"""
+ADDED BY 11777 WebQA victims
+"""
+# The flag determines whether to use the same image source for img search.
+# We assume that gold/distractor/x-distractors are all from the same tsv file
+# the default value should be False. 
+# However, it doesn't make any sense because we ONLY!!! have one tsv file.
+# We are pushed to hack her code. 
+FORCE_USE_SAME_IMAGE_SOURCE = True
+
+"""
+END
+"""
+
+
+
 def truncate_tokens_pair(tokens_a, tokens_b, max_len, max_len_a=0, max_len_b=0, trunc_seg=None, always_truncate_tail=False):
     num_truncated_a = [0, 0]
     num_truncated_b = [0, 0]
@@ -456,6 +472,13 @@ class Preprocess4webqa_VinVL(Pipeline):
         assert max_len_a+max_len_b <= max_len, "loader Processor: max_len_a + max_len_b > max_len"
 
         self.img_data_tsv = {}
+
+        # ImgDataTsv_dict contains three tsv files, which are for
+        # ImgDataTsv_dict = {
+        #   0: gold_img_tsv - the image source that should be found
+        #   1: neg_img_tsv - the image source that are distractors
+        #   2: x_neg_img_tsv - the image source that are cross-referred from a text based text
+        # }
         for k in ImgDataTsv_dict:
             self.img_data_tsv[k] = ImgDataTsv(ImgDataTsv_dict[k])
 
@@ -528,8 +551,11 @@ class Preprocess4webqa_VinVL(Pipeline):
                         segment_ids.extend([0] * n_pad)
 
                         image_id = int(image_id)
-                        print("VinVL loader image_id: ", image_id)
-                        vis_pe, scores, img, cls_label = self.img_data_tsv[image_id//10000000][image_id % 10000000]
+                        # print("VinVL loader image_id: ", image_id)
+                        if FORCE_USE_SAME_IMAGE_SOURCE:
+                            vis_pe, scores, img, cls_label = self.img_data_tsv[0][image_id % 10000000]
+                        else:
+                            vis_pe, scores, img, cls_label = self.img_data_tsv[image_id//10000000][image_id % 10000000]
                         
 
                         # Lazy normalization of the coordinates

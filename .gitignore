@@ -1,2 +1,5 @@
 # the path storing checkpoint data while running
 baseline/WebQA_Baseline/vlp/data/*
+baseline/WebQA_Baseline/vlp/light_output/*
+
+*.pyc

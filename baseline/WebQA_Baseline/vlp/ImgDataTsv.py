@@ -5,9 +5,14 @@ import numpy as np
 import torch
 
 class TSVFile(object):
-    def __init__(self, tsv_file):
+    def __init__(self, tsv_file, line_idx_file=None):
         self.tsv_file = tsv_file
-        self.lineidx = tsv_file.replace('.tsv', '.lineidx')
+        # added by victim
+        # why!!! assume tsv and lineidx are in the same folder?
+        if line_idx_file is None:
+            self.lineidx = tsv_file.replace('.tsv', '.lineidx')
+        else:
+            self.lineidx = line_idx_file
         self._fp = None
         self._lineidx = None
         # the process always keeps the process which opens the file. 

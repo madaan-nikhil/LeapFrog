@@ -25,7 +25,10 @@ from torch.optim.optimizer import required
 from torch.nn.utils import clip_grad_norm_
 
 from collections import defaultdict
-from torch._six import container_abcs
+try:
+    from torch._six import container_abcs
+except:
+    import collections.abc as container_abcs # six changes the name
 from copy import deepcopy
 from itertools import chain
 

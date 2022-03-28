@@ -4,9 +4,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-DATASET_PATH = "../../../../dataset/WebQA/" # the path that stores all the dataset files
-TSVFILE_PATH = "/media/UoneWorkspace/MMML_dataset/dataset/WebQA/WebQA_imgs_7z_chunks/imgs.tsv"
-
 import os
 os.environ['MASTER_ADDR'] = 'localhost'
 #os.environ['MASTER_PORT'] = '12355'
@@ -44,6 +41,24 @@ from datetime import datetime
 from pytz import timezone
 
 
+"""
+ADDED BY 11777 WebQA victims
+
+THE FOLLOWING FLAGS ARE FOR DEBUGGING.
+DURING TRAINING, PLEASE TURN THE FOLLOWING FLAGS TO FALSE
+"""
+
+# DEBUG_LEAVE_ON_CPU = True # default False
+DEBUG_LEAVE_ON_CPU = False # default False
+
+DATASET_PATH = "../../../../dataset/WebQA/" # the path that stores all the dataset files
+TSVFILE_PATH = "/media/UoneWorkspace/MMML_dataset/dataset/WebQA/WebQA_imgs_7z_chunks/imgs.tsv"
+
+# torch.cuda.synchronize() # speed up the model copy process
+
+"""
+END 
+"""
 
 
 
@@ -61,11 +76,11 @@ def _get_max_epoch_model(output_dir):
 
 def _get_loader_from_dataset(train_dataset, world_size, train_batch_size, num_workers, collate_fn):
     if world_size == 1:
-        print("\nRandomSampler")
+        print("\nLoading RandomSampler")
         train_sampler = RandomSampler(train_dataset, replacement=False)
         
     else:
-        print("\nDistributedSampler")
+        print("\nnLoading DistributedSampler")
         train_sampler = DistributedSampler(train_dataset)
     train_dataloader = torch.utils.data.DataLoader(train_dataset,
         batch_size=train_batch_size, sampler=train_sampler, num_workers=num_workers,
@@ -323,12 +338,23 @@ def main():
     if args.gold_img_tsv is not None: ImgDataTsv_dict[0] = args.gold_img_tsv
     if args.neg_img_tsv is not None: ImgDataTsv_dict[1] = args.neg_img_tsv
     if args.x_neg_img_tsv is not None: ImgDataTsv_dict[2] = args.x_neg_img_tsv
-    processor = webqa_VinVL_loader.Preprocess4webqa_VinVL(args.max_pred, args.mask_prob, \
-        list(tokenizer.vocab.keys()), tokenizer.convert_tokens_to_ids, seed=args.seed, max_len=args.max_seq_length, \
-        len_vis_input=args.len_vis_input, max_len_a=args.max_len_a, max_len_b=args.max_len_b, \
-        max_len_img_cxt=args.max_len_img_cxt, new_segment_ids=args.new_segment_ids, \
-        truncate_config={'trunc_seg': args.trunc_seg, 'always_truncate_tail': args.always_truncate_tail}, \
-        use_img_meta=args.use_img_meta, use_img_content=args.use_img_content, use_txt_fact=args.use_txt_fact, ImgDataTsv_dict = ImgDataTsv_dict)
+    processor = webqa_VinVL_loader.Preprocess4webqa_VinVL(\
+        args.max_pred, 
+        args.mask_prob,
+        list(tokenizer.vocab.keys()), 
+        tokenizer.convert_tokens_to_ids, 
+        seed=args.seed, 
+        max_len=args.max_seq_length,
+        len_vis_input=args.len_vis_input, 
+        max_len_a=args.max_len_a, 
+        max_len_b=args.max_len_b,
+        max_len_img_cxt=args.max_len_img_cxt, 
+        new_segment_ids=args.new_segment_ids,
+        truncate_config={'trunc_seg': args.trunc_seg, 'always_truncate_tail': args.always_truncate_tail}, 
+        use_img_meta=args.use_img_meta, 
+        use_img_content=args.use_img_content, 
+        use_txt_fact=args.use_txt_fact, 
+        ImgDataTsv_dict = ImgDataTsv_dict)
     
     
     train_dataloaders = []
@@ -336,14 +362,29 @@ def main():
     if "filter" in args.task_to_learn:
         if "txt" in args.answer_provided_by:
             if args.use_x_distractors:
-                train_dataset = webqa_VinVL_loader.webqaDataset_filter_with_both(dataset_json_path=args.txt_dataset_json_path, \
-                    split=args.split, Qcate=args.Qcate, \
-                    batch_size=args.train_batch_size, tokenizer=tokenizer, use_num_samples=args.use_num_samples, \
-                    processor=processor, answer_provided_by='txt', max_snippets=args.txt_filter_max_choices, max_imgs=args.img_filter_max_choices, device=device)
+                train_dataset = webqa_VinVL_loader.webqaDataset_filter_with_both(\
+                    dataset_json_path=args.txt_dataset_json_path, # path to the QA json file
+                    split=args.split, # whether to split the dataset to train/test/val
+                    Qcate=args.Qcate, # list of types of question categories, e.g. Yes/No, Shape, Number
+                    batch_size=args.train_batch_size, # batch size
+                    tokenizer=tokenizer, # bert tokenizer
+                    use_num_samples=args.use_num_samples, # TODO: not sure
+                    processor=processor, # TODO: webqa_VinVL_loader.Preprocess4webqa_VinVL, feature extractor?
+                    answer_provided_by='txt',
+                    max_snippets=args.txt_filter_max_choices,
+                    max_imgs=args.img_filter_max_choices,
+                    device=device)
             else:
-                train_dataset = webqa_VinVL_loader.webqaDataset_filter(dataset_json_path=args.txt_dataset_json_path, split=args.split, Qcate=args.Qcate, \
-                    batch_size=args.train_batch_size, tokenizer=tokenizer, use_num_samples=args.use_num_samples, \
-                    processor=processor, filter_max_choices=args.txt_filter_max_choices, device=device)
+                train_dataset = webqa_VinVL_loader.webqaDataset_filter(\
+                    dataset_json_path=args.txt_dataset_json_path, 
+                    split=args.split, 
+                    Qcate=args.Qcate,
+                    batch_size=args.train_batch_size, 
+                    tokenizer=tokenizer, 
+                    use_num_samples=args.use_num_samples,
+                    processor=processor, 
+                    filter_max_choices=args.txt_filter_max_choices, 
+                    device=device)
 
             train_dataloader, train_sampler = _get_loader_from_dataset(train_dataset, args.world_size, args.train_batch_size, args.num_workers, batch_list_to_batch_tensors)
             train_dataloaders.append(train_dataloader)
@@ -464,7 +505,8 @@ def main():
             model.bert.embeddings.position_embeddings.float()
             model.bert.embeddings.token_type_embeddings.float()
     print("model.to(device)")
-    # model.to(device) # TODO: for debug, we didn't move it to GPU, just to save time
+    if not DEBUG_LEAVE_ON_CPU:
+        model.to(device) # TODO: for debug, we didn't move it to GPU, just to save time
     print("load model end")
     if args.local_rank != -1:
         try:
@@ -583,6 +625,8 @@ def main():
             loss_dict = [[],[],[],[]]
             scst_reward = []
             for step, loader_idx in enumerate(iter_bar):
+                print("step", step, "loader_idx", loader_idx, flush=True)
+                print("size of dataloader_iters", len(dataloader_iters), flush=True)
                 batch = next(dataloader_iters[loader_idx])
                 for param_tensor in model.state_dict():
                     if torch.isnan(model.state_dict()[param_tensor]).any().item():
