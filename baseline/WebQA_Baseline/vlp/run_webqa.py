@@ -14,7 +14,7 @@ os.environ['MASTER_ADDR'] = 'localhost'
 import sys
 
 # I know, absolute path is bad, but I don't know how to fix it 
-sys.path.append("/home/yipenglin/Spring2022_MMML_Project/WebQA_Baseline")
+sys.path.append("../../WebQA_Baseline")
 
 import logging
 import glob
