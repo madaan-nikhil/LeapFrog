@@ -1,4 +1,4 @@
-# Diary of a Frustrated Alchemist
+# Diary of a Frustrated Alchemists
 
 ## Quick Update
 
