@@ -149,13 +149,33 @@ conda activate vlp
 ```
 ## First Step Retrieval training
 
-### run_webqa.py
+### run_webqa.py - img+txt
 ```
 python run_webqa.py --new_segment_ids --train_batch_size 128 --split train --answer_provided_by 'img|txt' --task_to_learn 'filter' --num_workers 4 --max_pred 10 --mask_prob 1.0 --learning_rate 3e-5 --gradient_accumulation_steps 128 --save_loss_curve --output_dir data/output/filter_debug --ckpts_dir ./data/ckpts/filter_debug --use_x_distractors --do_train --num_train_epochs 1
 ```
 
-### run_webqa_vinval.py
+### run_webqa.py - txt
+```
+python run_webqa.py --new_segment_ids --train_batch_size 128 --split train --answer_provided_by 'txt' --task_to_learn 'filter' --num_workers 4 --max_pred 10 --mask_prob 1.0 --learning_rate 3e-5 --gradient_accumulation_steps 128 --save_loss_curve --output_dir data/output/filter_debug --ckpts_dir ./data/ckpts/filter_debug --use_x_distractors --do_train --num_train_epochs 1
+```
+
+### run_webqa_vinval.py - img|txt
 ```
 python run_webqa_vinvl.py --new_segment_ids --train_batch_size 128 --split train --answer_provided_by 'img|txt' --task_to_learn 'filter' --num_workers 4 --max_pred 10 --mask_prob 1.0 --learning_rate 3e-5 --gradient_accumulation_steps 128 --save_loss_curve --output_dir data/output/filter_debug --ckpts_dir ./data/ckpts/filter_debug --use_x_distractors --do_train --num_train_epochs 1
 ```
 
+### run_webqa_vinval.py - txt
+```
+python run_webqa_vinvl.py --new_segment_ids --train_batch_size 128 --split train --answer_provided_by 'txt' --task_to_learn 'filter' --num_workers 4 --max_pred 10 --mask_prob 1.0 --learning_rate 3e-5 --gradient_accumulation_steps 128 --save_loss_curve --output_dir data/output/filter_debug --ckpts_dir ./data/ckpts/filter_debug --use_x_distractors --do_train --num_train_epochs 1
+```
+
+
+## Second Step QA training - 
+```
+python run_webqa.py --new_segment_ids --do_train --train_batch_size 128 --split train --answer_provided_by 'img|txt' --task_to_learn 'qa' --num_workers 4 --max_pred 50 --mask_prob 0.5 --learning_rate 1e-4 --gradient_accumulation_steps 64 --save_loss_curve --num_train_epochs 16 --output_dir light_output/qa_debug --ckpts_dir ./data/ckpts/qa_debug
+```
+
+
+```
+python run_webqa_vinvl.py --new_segment_ids --do_train --train_batch_size 128 --split train --answer_provided_by 'txt' --task_to_learn 'qa' --num_workers 4 --max_pred 50 --mask_prob 0.5 --learning_rate 1e-4 --gradient_accumulation_steps 64 --save_loss_curve --num_train_epochs 16 --output_dir light_output/qa_debug --ckpts_dir ./data/ckpts/qa_debug
+```
