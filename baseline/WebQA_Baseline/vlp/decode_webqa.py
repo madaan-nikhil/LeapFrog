@@ -6,8 +6,9 @@ from __future__ import print_function
 
 import os
 import sys
-sys.path.append("/home/yingshac/CYS/WebQnA/VLP")
+sys.path.append("/home/ubuntu/code/WebQA_Baseline-main/VLP")
 sys.path.append("/home/yingshan/CYS/WebQnA/VLP")
+sys.path.append(sys.path[0] + '/..')
 
 import logging
 import glob
@@ -196,7 +197,7 @@ def _get_loader_from_dataset(infr_dataset, infr_batch_size, num_workers, collate
 
     infr_dataloader = torch.utils.data.DataLoader(infr_dataset,
         batch_size=infr_batch_size, sampler=infr_sampler, num_workers=num_workers,
-        collate_fn=collate_fn, pin_memory=True)
+        collate_fn=collate_fn, pin_memory=True, drop_last=True)
     return infr_dataloader
 
 def _get_max_epoch_model(output_dir):
@@ -220,7 +221,7 @@ def main():
     parser.add_argument("--bert_model", default="bert-base-cased", type=str,
                         help="Bert pre-trained model selected in the list: bert-base-cased, bert-large-cased")
     parser.add_argument("--ckpts_dir",
-                        default='/data/yingshac/MMMHQA/ckpts/no_model_name_specified/',
+                        default='/data/yingshac/WebQA/ckpts/no_model_name_specified/',
                         type=str,
                         help="The output directory where checkpoints will be written.")
     parser.add_argument("--output_dir",
@@ -268,10 +269,16 @@ def main():
                         help="maximum length of target sequence")
 
     # webqa dataset
-    parser.add_argument('--txt_dataset_json_path', type=str, default="/home/yingshac/CYS/WebQnA/WebQnA_data_new/txt_dataset_0904_clean_fields.json")
-    parser.add_argument('--img_dataset_json_path', type=str, default="/home/yingshac/CYS/WebQnA/WebQnA_data_new/img_dataset_0904_clean_fields.json")
-    parser.add_argument('--gold_feature_folder', type=str, default="/data/yingshac/MMMHQA/imgFeatures_upd/gold")
-    parser.add_argument('--distractor_feature_folder', type=str, default="/data/yingshac/MMMHQA/imgFeatures_upd/distractors")
+    parser.add_argument('--txt_dataset_json_path', type=str, default="/home/yingshac/CYS/WebQnA/WebQnA_data_new/WebQA_0904_concat_newimgid_newguid.json")
+    parser.add_argument('--img_dataset_json_path', type=str, default="/home/yingshac/CYS/WebQnA/WebQnA_data_new/WebQA_0904_concat_newimgid_newguid.json")
+    # Image ids were sorted by gold/distractor/x_distractor in the zero version
+    #parser.add_argument('--gold_feature_folder', type=str, default="/data/yingshac/WebQA/imgFeatures_upd/gold")
+    #parser.add_argument('--distractor_feature_folder', type=str, default="/data/yingshac/WebQA/imgFeatures_upd/distractors")
+    #parser.add_argument('--x_distractor_feature_folder', type=str, default="/data/yingshac/WebQA/imgFeatures_x_distractors/x_distractors")
+
+    parser.add_argument('--feature_folder', type=str, default="/data/yingshac/WebQA/x101fpn_feature_release")
+    parser.add_argument('--image_id_map_path', type=str, default="/home/yingshac/CYS/WebQnA/WebQnA_data_new/image_id_map_0328.pkl")
+
     #parser.add_argument('--img_metadata_path', type=str, default="/home/yingshan/CYS/WebQnA/WebQnA_data/img_metadata-Copy1.json", help="how many samples should be loaded into memory")
     parser.add_argument('--use_num_samples', type=int, default=-1, help="how many samples should be loaded into memory")
     parser.add_argument('--answer_provided_by', type=str, default="img|txt")
@@ -319,6 +326,7 @@ def main():
     log_txt_content = []
 
     device = torch.device("cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu")
+    #device = torch.device("cpu")
     print("device = ", device)
     n_gpu = torch.cuda.device_count()
 
@@ -356,9 +364,11 @@ def main():
             max_tgt_len=args.max_tgt_len, new_segment_ids=args.new_segment_ids, \
             truncate_config={'trunc_seg': args.trunc_seg, 'always_truncate_tail': args.always_truncate_tail}, \
             use_img_meta=args.use_img_meta, use_img_content=args.use_img_content, use_txt_fact=args.use_txt_fact)
+    
+    print(f'#########Loading datasets#######')
 
     infr_dataloaders = []
-    if 'txt' in args.answer_provided_by:
+    if 'img' in args.answer_provided_by:
         args.output_suffix =  args.txt_dataset_json_path.split('/')[-1].replace(".json", "") + args.output_suffix
         train_dataset = webqa_loader.webqaDataset_qa(dataset_json_path=args.txt_dataset_json_path, split=args.split, Qcate=args.Qcate, \
                 batch_size=args.batch_size, tokenizer=tokenizer, use_num_samples=args.use_num_samples, \
@@ -367,14 +377,17 @@ def main():
         infr_dataloader = _get_loader_from_dataset(train_dataset, args.batch_size, args.num_workers, batch_list_to_batch_tensors)
         infr_dataloaders.append(infr_dataloader)
 
-    if "img" in args.answer_provided_by:
+    if "txt" in args.answer_provided_by:
         args.output_suffix = args.img_dataset_json_path.split('/')[-1].replace(".json", "") + args.output_suffix
         train_dataset = webqa_loader.webqaDataset_qa_with_img(dataset_json_path=args.img_dataset_json_path, split=args.split, Qcate=args.Qcate, \
-                batch_size=args.batch_size, tokenizer=tokenizer, gold_feature_folder=args.gold_feature_folder, \
-                distractor_feature_folder=args.distractor_feature_folder, use_num_samples=args.use_num_samples, \
-                processor=processor, device=device)
+                batch_size=args.batch_size, tokenizer=tokenizer, feature_folder=args.feature_folder, \
+                use_num_samples=args.use_num_samples, processor=processor, imgid_map=args.image_id_map_path, device=device)
         infr_dataloader = _get_loader_from_dataset(train_dataset, args.batch_size, args.num_workers, batch_list_to_batch_tensors)
         infr_dataloaders.append(infr_dataloader)
+    
+    infr_dataloaders.reverse()
+    
+    print(args.fp16)
 
     loader_lengths = [len(l) for l in infr_dataloaders]
     print("\nnbatches (all loaders) = ", sum(loader_lengths))
@@ -469,11 +482,14 @@ def main():
     output_Keywords_A = []
     output_Guid = []
     output_Qcate = []
+    print(len(infr_dataloaders))
     for infr_dataloader in infr_dataloaders:
+        torch.cuda.empty_cache()
         nbatches = len(infr_dataloader)
-        
+        print(f'number of batches {nbatches}')
         iter_bar = tqdm(infr_dataloader, desc = 'Step = X')
         for step, batch in enumerate(iter_bar):
+            #print(f'runnning inference')
             #if step<834: continue
             with torch.no_grad():
                 batch = [t.to(device) if not isinstance(t, list) else t for t in batch ]
@@ -516,6 +532,13 @@ def main():
         output_Keywords_A.extend(Keywords_A)
         output_Guid.extend(Guid)
         output_Qcate.extend(Qcate)
+        print(f'output_lines {len(output_lines)}')
+        print(f'output_confidence {len(output_confidence)}')
+        print(f'output_Q {len(output_Q)}')
+        print(f'output_A {len(output_A)}')
+        print(f'output_Keywords_A {len(output_Keywords_A)}')
+        print(f'output_Guid {len(output_Guid)}')
+        print(f'output_Qcate {len(output_Qcate)}')
         assert len(output_lines) == len(output_confidence) == len(output_Q) == len(output_A) == len(output_Keywords_A) == len(output_Guid) == len(output_Qcate)
 
     if args.no_eval:

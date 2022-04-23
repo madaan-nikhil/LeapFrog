@@ -225,8 +225,11 @@ class BertEmbeddings(nn.Module):
         self.LayerNorm = BertLayerNorm(config.hidden_size, eps=1e-5)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
         #print("Inside embedding: hiddensize = ", config.hidden_size)
+        #print(f"Inside Init {config.type_vocab_size}")
 
     def forward(self, vis_feats, vis_pe, input_ids, token_type_ids=None, context=None, cxt_modality_label=None, position_ids=None, max_len_img_cxt=200, prev_is_None=True):
+        #print(f'input_ids.size {input_ids.shape}')
+        #print(f'cxt_modality_label {cxt_modality_label}')
         seq_length = input_ids.size(1)
         if position_ids is None:
             position_ids = torch.arange(
@@ -238,13 +241,26 @@ class BertEmbeddings(nn.Module):
         words_embeddings = self.word_embeddings(input_ids)
         position_embeddings = self.position_embeddings(position_ids)
 
+        #print(f'position_embeddings {position_embeddings.shape}')
+
         if context in ["img", "both"] and prev_is_None and vis_feats.size()[-1] > 1: 
             ## TODO: fit the img feature chunk into words_embeddings with specified indices.
+            #try:
             words_embeddings[cxt_modality_label, 1:1+max_len_img_cxt] = vis_feats
             position_embeddings[cxt_modality_label, 1:1+max_len_img_cxt] = vis_pe
-            #words_embeddings = torch.cat((words_embeddings[:, :1], vis_feats, words_embeddings[:, max_len_img_cxt+1:]), dim=1)
+                #words_embeddings = torch.cat((words_embeddings[:, :1], vis_feats, words_embeddings[:, max_len_img_cxt+1:]), dim=1)
             assert max_len_img_cxt == 200, 'only support region attn!'
-            #position_embeddings = torch.cat((position_embeddings[:, :1], vis_pe, position_embeddings[:, max_len_img_cxt+1:]), dim=1) # hacky...
+                #position_embeddings = torch.cat((position_embeddings[:, :1], vis_pe, position_embeddings[:, max_len_img_cxt+1:]), dim=1) # hacky...
+            #except:
+                #print(f'input_ids.size {input_ids.shape}')
+                #print(f'cxt_modality_label {cxt_modality_label}')
+                #print(f'words_embeddings {words_embeddings.shape}')
+                #print(f'position_embeddings: {position_embeddings.shape}')
+                #print(f'max_len_img_cxt: {self.max_len_img_cxt}')
+                #exit(0)
+            #except:
+               # pass
+        #print(f'token_type_ids {token_type_ids}')
         token_type_embeddings = self.token_type_embeddings(token_type_ids)
 
         embeddings = words_embeddings + position_embeddings + token_type_embeddings
@@ -1439,7 +1455,7 @@ class BertForWebqaDecoder(PreTrainedBertModel):
                     ids = torch.reshape(
                         ids, id_shape + [1] * (x_rank - id_rank)) # batch_size x K x 1 x 1
                     ids = ids.expand(id_shape + x_shape[1:]) # batch_size x K x (ori_len+1) x emb_dim
-                y = torch.gather(x, 1, ids) # batch_size x K x (ori_len+1) x emb_dim
+                y = torch.gather(x, 1, ids.type(torch.int64)) # batch_size x K x (ori_len+1) x emb_dim
                 y = torch.reshape(y, x_shape) # batch_size*K x (ori_len+1) x emb_dim
                 return y
 
@@ -1576,7 +1592,7 @@ class BertForWebqaDecoder(PreTrainedBertModel):
                 pos_in_frame = score2pos[s][1]
                 seq = [wids_list[frame_id][pos_in_frame]]
                 for fid in range(frame_id, 0, -1):
-                    pos_in_frame = ptrs[fid][pos_in_frame]
+                    pos_in_frame = int(ptrs[fid][pos_in_frame])
                     seq.append(wids_list[fid - 1][pos_in_frame])
                 seq.reverse()
                 traces[-1][s] = seq
