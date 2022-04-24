@@ -197,7 +197,7 @@ def _get_loader_from_dataset(infr_dataset, infr_batch_size, num_workers, collate
 
     infr_dataloader = torch.utils.data.DataLoader(infr_dataset,
         batch_size=infr_batch_size, sampler=infr_sampler, num_workers=num_workers,
-        collate_fn=collate_fn, pin_memory=True, drop_last=True)
+        collate_fn=collate_fn, pin_memory=True, drop_last=False)
     return infr_dataloader
 
 def _get_max_epoch_model(output_dir):

@@ -322,7 +322,7 @@ class webqaDataset_qa_with_img(torch.utils.data.Dataset):
             dataset_J = json.load(f)
             #if len(list(dataset_J.keys()))%2:
                 #dataset_J.pop(list(dataset_J.keys())[0])
-        print(f'dataset_json_path {dataset_json_path}')
+        print(f'dataset_json_path {dataset_json_path} {len(list(dataset_J.keys()))}')
         count = 0
         for i in dataset_J:
             datum = dataset_J[i]
