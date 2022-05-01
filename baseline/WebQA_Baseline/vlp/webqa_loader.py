@@ -18,8 +18,8 @@ import sys
 import boto3
 
 s3 = boto3.resource('s3',
-aws_access_key_id='AKIATMAHPBUAD7RF4JWP',
-aws_secret_access_key='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')
+aws_access_key_id='random',
+aws_secret_access_key='random')
 
 
 def truncate_tokens_pair(tokens_a, tokens_b, max_len, max_len_a=0, max_len_b=0, trunc_seg=None, always_truncate_tail=False):
