@@ -15,7 +15,7 @@ Data found on the web generally spans numerous domains and is multi-hop in natur
 | BERT w Contrastive Loss            | 45.3                |
 
 # Final Report
-[An Internal Link](/report/11785_Project___Final.pdf)
+[Final Report](/report/11785_Project___Final.pdf)
 
 
 # Team Members
