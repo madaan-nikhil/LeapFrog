@@ -9,10 +9,10 @@ Data found on the web generally spans numerous domains and is multi-hop in natur
 # Results
 | Model                              | Source retrieval F1 |
 |------------------------------------|---------------------|
-| BERT (pre-trained)                 | 18.49               |
-| CLIP (pre-trained)                 | 16                  |
-| Sentence Transformer (pre-trained) | 20.2                |
-| BERT w Contrastive Loss            | 45.3                |
+| BERT ([pre-trained](https://huggingface.co/docs/transformers/model_doc/bert))               | 18.49               |
+| CLIP ([pre-trained](https://huggingface.co/docs/transformers/main/en/model_doc/clip#overview))                 | 16                  |
+| Sentence Transformer ([pre-trained](https://www.sbert.net/)) | 20.2                |
+| BERT w Contrastive Loss(Ours)            | 45.3                |
 
 # Final Report
 [Final Report](/report/11785_Project___Final.pdf)
@@ -23,3 +23,10 @@ Data found on the web generally spans numerous domains and is multi-hop in natur
 * Gabriel Moreira
 * Nikhil Madaan
 * Rohan Panda 
+
+# Acknowledgements
+
+This repository is developed upon the original repository for WebQA [found here](https://github.com/WebQnA/WebQA_Baseline).
+
+We would like to thank the authors of WebQA for their valuable works and for making the data and code available.
+Special thanks to [Yingshan Chang](https://github.com/zdxdsw) and [Jeff Moore](https://lti.cs.cmu.edu/people/222227077/jeffrey-moore) for guiding us throughout the project.
